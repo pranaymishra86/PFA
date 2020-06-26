@@ -82,12 +82,12 @@ ul {
 }
 
 #results {
-	height: 87px;
-	width: 120px;
-	background-color: #ffc107;
+	height: 300px;
+	width: 300px;
+	background-color: #000000;
 	position: fixed;
 	right: 10px;
-	bottom: 10px;
+	bottom: 150px;
 	color: white;
 	font-size: 12px;
 	text-align: center;
@@ -96,13 +96,20 @@ ul {
 
 #resultsIcon {
 	margin-bottom: 3px;
-	margin-top: 7px;
-	font-size: 16px;
+	margin-top: 40px;
+	font-size: 30px;
 }
 
 #duration, #length {
 	padding: 3px;
-}
+	width:150px;
+	position:fixed;
+	right:85px;
+	bottom:225px;
+	font-size:24px;
+	
+	text-align: center;
+
 
 #infoModalBtn {
 	margin-left: 20px;
