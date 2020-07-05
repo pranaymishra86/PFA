@@ -234,7 +234,7 @@ $("#startBtn").click(function() {
 
 //activating the end button
 
-$("#endBtn").click(function() {
+$("#clearBtn").click(function() {
 	if(inProgress) {update("wait"); return;} // if the user presses the button while the algorithm is still going on, then display the error message!
 	clearBoard(keepWalls=false); //else, we will call the clear board function, with specification like dont keep the walls, remove them also 
 });
@@ -275,7 +275,7 @@ Functions
 
 function moveStartOrEnd(prevIndex,newIndex,startOrEnd) {
 	var newCellY = newIndex % totalCols;
-	var newCellX = math.floor((newIndex - newCellY)/totalCols);
+	var newCellX = Math.floor((newIndex - newCellY)/totalCols);
 
 	if (startOrEnd == "start") {
 		startCell = [newCellX,newCellY];
@@ -321,7 +321,7 @@ function updateSpeedDisplay() {
 
 
 //Updating the start button after choosing the algorithm
-function updateStartBtntext() {
+function updateStartBtnText() {
 	if(algorithm == "Depth-First Search (DFS)") {
 		$(".startBtn").html("StartDFS");
 	}
@@ -510,7 +510,7 @@ function BFS() {
 		}
 		//adding the neighbouring cells in queue
 		var neighbors  = getNeighbors(r,c);
-		for(var k=0;k<neighbors.length();k++) {
+		for(var k=0;k<neighbors.length;k++) {
 			var m=neighbors[k][0];
 			var n=neighbors[k][1];
 			if(visited[m][n]) {continue;}
@@ -547,3 +547,207 @@ function BFS() {
 
 
 
+//function for Dijkstra's Algorithm
+
+function dijkstra() {
+	var pathFound = false;
+	var myHeap = new minHeap();
+	var prev = createPrev();
+	var distances = createDistances();
+	var visited = createVisited();
+	distances[ startCell[0] ][ startCell[1] ] = 0;
+	myHeap.push([0, [startCell[0], startCell[1]]]);
+	cellsToAnimate.push([[startCell[0], startCell[1]], "searching"]);
+	while (!myHeap.isEmpty()){
+		var cell = myHeap.getMin();
+		//console.log("Min was just popped from the heap! Heap is now: " + JSON.stringify(myHeap.heap));
+		var i = cell[1][0];
+		var j = cell[1][1];
+		if (visited[i][j]){ continue; }
+		visited[i][j] = true;
+		cellsToAnimate.push([[i, j], "visited"]);
+		if (i == endCell[0] && j == endCell[1]){
+			pathFound = true;
+			break;
+		}
+		var neighbors = getNeighbors(i, j);
+		for (var k = 0; k < neighbors.length; k++){
+			var m = neighbors[k][0];
+			var n = neighbors[k][1];
+			if (visited[m][n]){ continue; }
+			var newDistance = distances[i][j] + 1;
+			if (newDistance < distances[m][n]){
+				distances[m][n] = newDistance;
+				prev[m][n] = [i, j];
+				myHeap.push([newDistance, [m, n]]);
+				//console.log("New cell was added to the heap! It has distance = " + newDistance + ". Heap = " + JSON.stringify(myHeap.heap));
+				cellsToAnimate.push( [[m, n], "searching"] );
+			}
+		}
+		//console.log("Cell [" + i + ", " + j + "] was just evaluated! myHeap is now: " + JSON.stringify(myHeap.heap));
+	}
+	//console.log(JSON.stringify(myHeap.heap));
+	// Make any nodes still in the heap "visited"
+	while ( !myHeap.isEmpty() ){
+		var cell = myHeap.getMin();
+		var i = cell[1][0];
+		var j = cell[1][1];
+		if (visited[i][j]){ continue; }
+		visited[i][j] = true;
+		cellsToAnimate.push( [[i, j], "visited"] );
+	}
+	// If a path was found, illuminate it
+	if (pathFound) {
+		var i = endCell[0];
+		var j = endCell[1];
+		cellsToAnimate.push( [endCell, "success"] );
+		while (prev[i][j] != null){
+			var prevCell = prev[i][j];
+			i = prevCell[0];
+			j = prevCell[1];
+			cellsToAnimate.push( [[i, j], "success"] );
+		}
+	}
+	return pathFound;
+}
+
+function makeWalls(){
+	var walls = [];
+	for (var i = 0; i < totalRows; i++){
+		var row = [];
+		for (var j = 0; j < totalCols; j++){
+			row.push(true);
+		}
+		walls.push(row);
+	}
+	return walls;
+}
+
+//checking if the neighbor of any traversing node is a Wall?
+function neighborsThatAreWalls( neighbors, walls ){
+	var neighboringWalls = 0;
+	for (var k = 0; k < neighbors.length; k++){
+		var i = neighbors[k][0];
+		var j = neighbors[k][1];
+		if (walls[i][j]) { neighboringWalls++; }
+	}
+	return neighboringWalls;
+}
+
+
+//Used in Dijkstra's Algorithm
+function createDistances(){
+	var distances = [];
+	for (var i = 0; i < totalRows; i++){
+		var row = [];
+		for (var j = 0; j < totalCols; j++){
+			row.push(Number.POSITIVE_INFINITY);
+		}
+		distances.push(row);
+	}
+	return distances;
+}
+
+function createPrev(){
+	var prev = [];
+	for (var i = 0; i < totalRows; i++){
+		var row = [];
+		for (var j = 0; j < totalCols; j++){
+			row.push(null);
+		}
+		prev.push(row);
+	}
+	return prev;
+}
+
+
+//used for getting the neighbours of the node we are on!
+function getNeighbors(i, j){
+	var neighbors = [];
+	if ( i > 0 ){ neighbors.push( [i - 1, j] );}
+	if ( j > 0 ){ neighbors.push( [i, j - 1] );}
+	if ( i < (totalRows - 1) ){ neighbors.push( [i + 1, j] );}
+	if ( j < (totalCols - 1) ){ neighbors.push( [i, j + 1] );}
+	return neighbors;
+}
+
+
+async function animateCells(){
+	animationState = null;
+	var cells = $("#tableContainer").find("td");
+	var startCellIndex = (startCell[0] * (totalCols)) + startCell[1];
+	var endCellIndex = (endCell[0] * (totalCols)) + endCell[1];
+	var delay = getDelay();
+	for (var i = 0; i < cellsToAnimate.length; i++){
+		var cellCoordinates = cellsToAnimate[i][0];
+		var x = cellCoordinates[0];
+		var y = cellCoordinates[1];
+		var num = (x * (totalCols)) + y;
+		if (num == startCellIndex || num == endCellIndex){ continue; }
+		var cell = cells[num];
+		var colorClass = cellsToAnimate[i][1];
+
+		// Wait until its time to animate
+		await new Promise(resolve => setTimeout(resolve, delay));
+
+		$(cell).removeClass();
+		$(cell).addClass(colorClass);
+	}
+	cellsToAnimate = [];
+	//console.log("End of animation has been reached!");
+	return new Promise(resolve => resolve(true));
+}
+
+
+
+function getDelay(){
+	var delay;
+	if (animationSpeed === "Slow"){
+		if (algorithm == "Depth-First Search (DFS)") {
+			delay = 25;
+		} else {
+			delay = 20;
+		}
+	} else if (animationSpeed === "Normal") {
+		if (algorithm == "Depth-First Search (DFS)") {
+			delay = 15;
+		} else {
+			delay = 10;
+		}
+	} else if (animationSpeed == "Fast") {
+		if (algorithm == "Depth-First Search (DFS)") {
+			delay = 10;
+		} else {
+			delay = 5;
+		}
+	}
+	console.log("Delay = " + delay);
+	return delay;
+}
+
+function clearBoard( keepWalls ){
+	var cells = $("#tableContainer").find("td");
+	var startCellIndex = (startCell[0] * (totalCols)) + startCell[1];
+	var endCellIndex = (endCell[0] * (totalCols)) + endCell[1];
+	for (var i = 0; i < cells.length; i++){
+			isWall = $( cells[i] ).hasClass("wall");
+			$( cells[i] ).removeClass();
+			if (i == startCellIndex){
+				$(cells[i]).addClass("start"); 
+			} else if (i == endCellIndex){
+				$(cells[i]).addClass("end"); 
+			} else if ( keepWalls && isWall ){ 
+				$(cells[i]).addClass("wall"); 
+			}
+	}
+}
+
+clearBoard();
+
+$('#myModal').on('shown.bs.modal', function () {
+  $('#myInput').trigger('focus');
+})
+
+$(window).on('load',function(){
+        $('#exampleModalLong').modal('show');
+});

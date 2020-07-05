@@ -77,9 +77,7 @@ ul {
 	margin-bottom: 20px;
 }
 
-#modalTitleContainer {
-	padding-top: 10px;
-}
+
 
 #results {
 	height: 300px;
@@ -109,12 +107,5 @@ ul {
 	font-size:24px;
 	
 	text-align: center;
-
-
-#infoModalBtn {
-	margin-left: 20px;
 }
 
-.fun-fact {
-	color: darkgreen;
-}
