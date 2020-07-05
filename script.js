@@ -39,6 +39,98 @@ var merigrid = generateGrid(totalRows,totalCols);
 
 $( "#tableContainer" ).append(merigrid);
 
+
+/*
+--------------------------------------
+Object and Data Structures to be used
+--------------------------------------
+*/
+
+function Queue() { 
+ this.stack = new Array();
+ this.dequeue = function(){
+  	return this.stack.pop(); 
+ } 
+ this.enqueue = function(item){
+  	this.stack.unshift(item);
+  	return;
+ }
+ this.empty = function(){
+ 	return ( this.stack.length == 0 );
+ }
+ this.clear = function(){
+ 	this.stack = new Array();
+ 	return;
+ }
+}
+
+function minHeap() {
+	this.heap = [];
+	this.isEmpty = function(){
+		return (this.heap.length == 0);
+	}
+	this.clear = function(){
+		this.heap = [];
+		return;
+	}
+	this.getMin = function(){
+		if (this.isEmpty()){
+			return null;
+		}
+		var min = this.heap[0];
+		this.heap[0] = this.heap[this.heap.length - 1];
+		this.heap[this.heap.length - 1] = min;
+		this.heap.pop();
+		if (!this.isEmpty()){
+			this.siftDown(0);
+		}
+		return min;
+	}
+	this.push = function(item){
+		this.heap.push(item);
+		this.siftUp(this.heap.length - 1);
+		return;
+	}
+	this.parent = function(index){
+		if (index == 0){
+			return null;
+		}
+		return Math.floor((index - 1) / 2);
+	}
+	this.children = function(index){
+		return [(index * 2) + 1, (index * 2) + 2];
+	}
+	this.siftDown = function(index){
+		var children = this.children(index);
+		var leftChildValid = (children[0] <= (this.heap.length - 1));
+		var rightChildValid = (children[1] <= (this.heap.length - 1));
+		var newIndex = index;
+		if (leftChildValid && this.heap[newIndex][0] > this.heap[children[0]][0]){
+			newIndex = children[0];
+		}
+		if (rightChildValid && this.heap[newIndex][0] > this.heap[children[1]][0]){
+			newIndex = children[1];
+		}
+		// No sifting down needed
+		if (newIndex === index){ return; }
+		var val = this.heap[index];
+		this.heap[index] = this.heap[newIndex];
+		this.heap[newIndex] = val;
+		this.siftDown(newIndex);
+		return;
+	}
+	this.siftUp = function(index){
+		var parent = this.parent(index);
+		if (parent !== null && this.heap[index][0] < this.heap[parent][0]){
+			var val = this.heap[index];
+			this.heap[index] = this.heap[parent];
+			this.heap[parent] = val;
+			this.siftUp(parent);
+		}
+		return;
+	}
+}
+
 /*
 ----------------
 Mouse Functions
@@ -154,10 +246,304 @@ Activating NavBar menus
 -----------------------
 */
 
+//Updating the Algorithm Chosen
+$("#algorithms .dropdown-item").click(function(){
+	if(inProgress) {update("wait"); return; }
+	algorithm = $(this).text();
+	updateStartBtnText();
+	console.log("Algorithm chosen is: "+algorithm);
+});
+
+
+//Updating the Speed of the animation
+
+$("#speed .dropdown-item").click(function(){
+	if(inProgress) {update("wait"); return; }
+	animationSpeed = $(this).text();
+	updateSpeedDisplay();
+	console.log("Speed has been chosen as: "+animationSpeed);
+});
+
 
 /*
 -------------------
 Functions
 -------------------
 */
+
+//This function is created for moving the Starting pointer or the ending pointer.
+
+function moveStartOrEnd(prevIndex,newIndex,startOrEnd) {
+	var newCellY = newIndex % totalCols;
+	var newCellX = math.floor((newIndex - newCellY)/totalCols);
+
+	if (startOrEnd == "start") {
+		startCell = [newCellX,newCellY];
+		console.log("Moving start to ["+newCellX+","+newCellY+"]")
+	} else {
+		endCell  = [newCellX, newCellY];
+		console.log("Moving end to ["+newCellX+","+newCellY+"]")
+	}
+	clearBoard(keepWalls=true);
+	return;
+}
+
+//This function is used to move the end pointer
+function moveEnd(prevIndex,newIndex) {
+	$($("td").find(prevIndex)).removeClass();
+
+	var newEnd = $("td").find(newIndex);
+	$(newEnd).removeClass();
+	$(newEnd).addClass("end");
+
+	var newEndX = Math.floor(newIndex/totalRows);
+	var newEndY = Math.floor(newIndex/totalCols);
+	startCell = [newStartX,newStartY];
+	return;
+}
+
+
+
+//Updating the display of the speed chosen
+
+function updateSpeedDisplay() {
+	if(animationSpeed == "Slow") {
+		$(".speedDisplay").text("Speed: Slow");
+	}
+	else if(animationSpeed == "Normal") {
+		$(".speedDisplay").text("Speed: Normal");
+	}
+	else if(animationSpeed == "Fast") {
+		$(".speedDisplay").text("Speed: Fast");
+	}
+	return;
+}
+
+
+//Updating the start button after choosing the algorithm
+function updateStartBtntext() {
+	if(algorithm == "Depth-First Search (DFS)") {
+		$(".startBtn").html("StartDFS");
+	}
+	else if(algorithm == "Breadth First Search") {
+		$(".startBtn").html("Start BFS");
+	}
+
+	else if(algorithm == "Dijkstra's Algorithm") {
+		$(".startBtn").html("Start Dijkstra");
+	}
+	return;
+}
+
+//For displaying error messages
+function update(message) {
+	$("#resultsIcon").removeClass();
+	$("#resultsIcon").addClass("fas fa-exclamation");
+	$("#results").css("background-color","#ffc107");
+	$("#length").text("");
+	if(message == "wait") {
+		$("#duration").text("Please wait fot the Algorithm to finish!");
+	}
+}
+
+
+// For displaying results
+function updateResults(duration,pathFound,length) {
+	var firstAnimation = "swashOut";
+	var secondAnimation = "swashIn";
+	$("#results").removeClass();
+	$("#results").addClass("magictime "+firstAnimation);
+	setTimeout(function(){
+		$("#resultsIcon").removeClass();
+		if(pathFound){
+			$("#results").css("background-color","#77dd77");
+			$("resultsIcon").addClass("fas fa-check");
+		}
+		else {
+			$("#results").css("background-color","#ff6961");
+			$("#resultsIcon").addClass("fas fa-times");
+		}
+		$("#duration").text("Duration "+duration+" ms");
+		$("#length").text("Length: "+length);
+		$("#results").removeClass(firstAnimation);
+		$("#results").addClass(secondAnimation);
+
+	},1100);
+}
+
+
+
+//counting length of the successful path 
+
+function countLength() {
+	var cells = $("td");
+	var l=0;
+	for(var i=0;i<cells.length;i++) {
+		if($(cells[i]).hasClass("success")) {
+			l++;
+		}
+	}
+	return l;
+}
+
+//Preparing the Grid for grpah traversal
+
+async function traverseGraph(algorithm) {
+	inProgress = true;
+	clearBoard (keepWalls = true);
+	var startTime  = Date.now();
+	var pathFound = executeAlgo();
+	var endTime = Date.now();
+	await animateCells();
+	if(pathFound) {
+		updateResults((endTime - startTime),true,countLength());
+	}
+	else {
+		updateResults((endTime - startTime),false,countLength());
+	}
+	inProgress = false;
+	justFinished = true;
+}
+
+//Finding the desired path for the chosen Algorithm
+
+function executeAlgo() {
+	if(algorithm == "Depth First Search") {
+		var visited = createVisited();
+		var pathFound = DFS(startCell[0],startCell[1],visited);
+	} else if (algorithm == "Breadth First Search") {
+		var pathFound = BFS();
+	} else if  (algorithm == "Dijkstra's Algorithm") {
+		var pathFound = dijkstra();
+	}
+	return pathFound;
+}
+
+
+//Function to retain the walls while traversing the algorithm
+
+function makewall(cell) {
+	if(!createWalls) {return;}
+	var index = $("td").index(cell);
+	var row = Math.floor((index)/totalRows)+1;
+	var col = (index%totalCols)+1;
+	console.log([row,col]);
+	if((inProgress == false)&&!(row==1&&col==1)&&!(row==totalRows && col == totalCols)) {
+		$(cell).toggleClass("wall");
+	}
+} 
+
+
+
+//Function to make or consider a cell to be visited
+
+function createVisited() {
+	var visited = [];
+	var cells = $("#tableContainer").find("td");
+	for(var i=0;i<totalRows;i++) {
+		var row = [];
+		for( var j=0;j<totalCols;j++) {
+			if(cellIsAWall(i,j,cells)) {
+				row.push(true);
+			}
+			else {
+				row.push(false);
+			}
+		}
+		visited.push(row);
+	}
+	return visited;
+}
+
+//Function to check if a cell has a wall or not.
+
+function cellIsAWall(i,j,cells) {
+	var cellNum = (i*(totalCols))+j;
+	return $(cells[cellNum]).hasClass("wall");
+}
+
+
+//Function for DFS Traversal
+
+function DFS(i,j,visited) {
+	if(i==endCell[0]&&j==endCell[1]) {
+		cellsToAnimate.push([[i,j],"success"]);
+		return true;
+	}
+	visited[i][j] = true;
+	cellsToAnimate.push([[i,j],"searching"]);
+	var neighbors = getNeighbors(i,j);
+	for(var k=0;k<neighbors.length;k++) {
+		var m = neighbors[k][0];
+		var n = neighbors[k][1];
+		if(!visited[m][n]) {
+			var pathFound = DFS(m,n,visited);
+			if(pathFound) {
+				cellsToAnimate.push([[i,j],"success"]);
+				return true;
+			}
+		}
+	}
+	cellsToAnimate.push([[i,j],"visited"]);
+	return false;
+}
+
+
+//Function for BFS traversal
+
+function BFS() {
+	var pathFound = false;
+	var myQueue = new Queue();
+	var prev = createPrev();
+	var visited = createVisited();
+	myQueue.enqueue(startCell);
+	cellsToAnimate.push(startCell,"searching");
+	visited[startCell[0]][startCell[1]] = true;
+	while(!myQueue.empty()) {
+		var cell = myQueue.dequeue();
+		var r = cell[0];
+		var c = cell[1];
+		cellsToAnimate.push([cell,"visited"]);
+		if(r==endCell[0]&&c==endCell[1]) {
+			pathFound = true;
+			break;
+		}
+		//adding the neighbouring cells in queue
+		var neighbors  = getNeighbors(r,c);
+		for(var k=0;k<neighbors.length();k++) {
+			var m=neighbors[k][0];
+			var n=neighbors[k][1];
+			if(visited[m][n]) {continue;}
+			visited[m][n] = true;
+			prev[m][n] = [r,c];
+			cellsToAnimate.push([neighbors[k],"searching"]);
+			myQueue.enqueue(neighbors[k]);
+		}
+	}
+
+	//making nodes in the queue to be "visited"
+	while(!myQueue.empty()) {
+		var cell = myQueue.dequeue();
+		var r=cell[0];
+		var c=cell[1];
+		cellsToAnimate.push([cell,"visited"]);
+	}
+
+	//highlighting the found path
+	if(pathFound) {
+		var r = endCell[0];
+		var c = endCell[1];
+		cellsToAnimate.push([[r,c],"success"]);
+		while(prev[r][c]!=null) {
+			var prevCell = prev[r][c];
+			r = prevCell[0];
+			c = prevCell[1];
+			cellsToAnimate.push([[r,c],"success"]);
+		}
+	}
+
+	return pathFound;
+}
+
+
 
