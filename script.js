@@ -322,10 +322,7 @@ function updateSpeedDisplay() {
 
 //Updating the start button after choosing the algorithm
 function updateStartBtnText() {
-	if(algorithm == "Depth-First Search (DFS)") {
-		$(".startBtn").html("StartDFS");
-	}
-	else if(algorithm == "Breadth First Search") {
+    if(algorithm == "Breadth First Search") {
 		$(".startBtn").html("Start BFS");
 	}
 
@@ -337,36 +334,36 @@ function updateStartBtnText() {
 
 //For displaying error messages
 function update(message) {
-	$("#resultsIcon").removeClass();
-	$("#resultsIcon").addClass("fas fa-exclamation");
-	$("#results").css("background-color","#ffc107");
-	$("#length").text("");
+	// $("#resultsIcon").removeClass();
+	// $("#resultsIcon").addClass("fas fa-exclamation");
+	// $("#results").css("background-color","#ffffff");
+	$("#duration").text("!");
 	if(message == "wait") {
-		$("#duration").text("Please wait fot the Algorithm to finish!");
+		$("#length").text("Please wait fot the Algorithm to finish!");
 	}
 }
 
 
 // For displaying results
 function updateResults(duration,pathFound,length) {
-	var firstAnimation = "swashOut";
-	var secondAnimation = "swashIn";
-	$("#results").removeClass();
-	$("#results").addClass("magictime "+firstAnimation);
+	// var firstAnimation = "swashOut";
+	// var secondAnimation = "swashIn";
+	// $("#results").removeClass();
+	// $("#results").addClass("magictime "+firstAnimation);
 	setTimeout(function(){
-		$("#resultsIcon").removeClass();
+		// $("#resultsIcon").removeClass();
 		if(pathFound){
-			$("#results").css("background-color","#77dd77");
-			$("resultsIcon").addClass("fas fa-check");
+			$("#results").css("background-color","green");
+			// $("resultsIcon").addClass("fas fa-check");
 		}
 		else {
 			$("#results").css("background-color","#ff6961");
-			$("#resultsIcon").addClass("fas fa-times");
+			//$("#resultsIcon").addClass("fas fa-times");
 		}
-		$("#duration").text("Duration "+duration+" ms");
+		$("#duration").text("Duration: "+duration+"ms");
 		$("#length").text("Length: "+length);
-		$("#results").removeClass(firstAnimation);
-		$("#results").addClass(secondAnimation);
+		// $("#results").removeClass(firstAnimation);
+		// $("#results").addClass(secondAnimation);
 
 	},1100);
 }
@@ -465,28 +462,29 @@ function cellIsAWall(i,j,cells) {
 
 //Function for DFS Traversal
 
-function DFS(i,j,visited) {
-	if(i==endCell[0]&&j==endCell[1]) {
-		cellsToAnimate.push([[i,j],"success"]);
-		return true;
-	}
-	visited[i][j] = true;
-	cellsToAnimate.push([[i,j],"searching"]);
-	var neighbors = getNeighbors(i,j);
-	for(var k=0;k<neighbors.length;k++) {
-		var m = neighbors[k][0];
-		var n = neighbors[k][1];
-		if(!visited[m][n]) {
-			var pathFound = DFS(m,n,visited);
-			if(pathFound) {
-				cellsToAnimate.push([[i,j],"success"]);
-				return true;
-			}
-		}
-	}
-	cellsToAnimate.push([[i,j],"visited"]);
-	return false;
-}
+// function DFS(i,j,visited) {
+// 	if(i==endCell[0]&&j==endCell[1]) {
+// 		cellsToAnimate.push([[i,j],"success"]);
+// 		return true;
+// 	}
+// 	visited[i][j] = true;
+// 	cellsToAnimate.push([[i,j],"searching"]);
+// 	var neighbors = getNeighbors(i,j);
+// 	for(var k=0;k<neighbors.length;k++) {
+// 		var m = neighbors[k][0];
+// 		var n = neighbors[k][1];
+// 		if(!visited[m][n]) {
+
+// 			var pathFound = DFS(m,n,visited);
+// 			if(pathFound) {
+// 				cellsToAnimate.push([[i,j],"success"]);
+// 				return true;
+// 			}
+// 		}
+// 	}
+// 	cellsToAnimate.push([[i,j],"visited"]);
+// 	return false;
+// }
 
 
 //Function for BFS traversal
@@ -703,21 +701,15 @@ async function animateCells(){
 function getDelay(){
 	var delay;
 	if (animationSpeed === "Slow"){
-		if (algorithm == "Depth-First Search (DFS)") {
-			delay = 25;
-		} else {
+		 {
 			delay = 20;
 		}
 	} else if (animationSpeed === "Normal") {
-		if (algorithm == "Depth-First Search (DFS)") {
-			delay = 15;
-		} else {
+		{
 			delay = 10;
 		}
 	} else if (animationSpeed == "Fast") {
-		if (algorithm == "Depth-First Search (DFS)") {
-			delay = 10;
-		} else {
+		 {
 			delay = 5;
 		}
 	}
