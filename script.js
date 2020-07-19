@@ -7,8 +7,8 @@ var algorithm = null;
 var justFinished = false;
 var animationSpeed = "Fast";
 var animationState = null;
-var startCell = [11, 15]; //the green cell
-var endCell = [11, 25];	//the red cell
+var startCell = [15, 20]; //the green cell
+var endCell = [20, 20];	//the red cell
 var movingStart = false;
 var movingEnd = false;
 
@@ -304,30 +304,14 @@ function moveEnd(prevIndex,newIndex) {
 
 
 
-//Updating the display of the speed chosen
-
-function updateSpeedDisplay() {
-	if(animationSpeed == "Slow") {
-		$(".speedDisplay").text("Speed: Slow");
-	}
-	else if(animationSpeed == "Normal") {
-		$(".speedDisplay").text("Speed: Normal");
-	}
-	else if(animationSpeed == "Fast") {
-		$(".speedDisplay").text("Speed: Fast");
-	}
-	return;
-}
-
-
 //Updating the start button after choosing the algorithm
 function updateStartBtnText() {
     if(algorithm == "Breadth First Search") {
-		$(".startBtn").html("Start BFS");
+		$("#startBtn").html("Start BFS");
 	}
 
 	else if(algorithm == "Dijkstra's Algorithm") {
-		$(".startBtn").html("Start Dijkstra");
+		$("#startBtn").html("Start Dijkstra");
 	}
 	return;
 }
@@ -339,7 +323,7 @@ function update(message) {
 	// $("#results").css("background-color","#ffffff");
 	$("#duration").text("!");
 	if(message == "wait") {
-		$("#length").text("Please wait fot the Algorithm to finish!");
+		$("#length").text("Please wait for the Algorithm to finish!");
 	}
 }
 
@@ -361,7 +345,7 @@ function updateResults(duration,pathFound,length) {
 			//$("#resultsIcon").addClass("fas fa-times");
 		}
 		$("#duration").text("Duration: "+duration+"ms");
-		$("#length").text("Length: "+length);
+		$("#length").text("Length: "+length+" units");
 		// $("#results").removeClass(firstAnimation);
 		// $("#results").addClass(secondAnimation);
 
@@ -459,32 +443,6 @@ function cellIsAWall(i,j,cells) {
 	return $(cells[cellNum]).hasClass("wall");
 }
 
-
-//Function for DFS Traversal
-
-// function DFS(i,j,visited) {
-// 	if(i==endCell[0]&&j==endCell[1]) {
-// 		cellsToAnimate.push([[i,j],"success"]);
-// 		return true;
-// 	}
-// 	visited[i][j] = true;
-// 	cellsToAnimate.push([[i,j],"searching"]);
-// 	var neighbors = getNeighbors(i,j);
-// 	for(var k=0;k<neighbors.length;k++) {
-// 		var m = neighbors[k][0];
-// 		var n = neighbors[k][1];
-// 		if(!visited[m][n]) {
-
-// 			var pathFound = DFS(m,n,visited);
-// 			if(pathFound) {
-// 				cellsToAnimate.push([[i,j],"success"]);
-// 				return true;
-// 			}
-// 		}
-// 	}
-// 	cellsToAnimate.push([[i,j],"visited"]);
-// 	return false;
-// }
 
 
 //Function for BFS traversal
