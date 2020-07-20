@@ -10,7 +10,8 @@ td {
 }
 
 .key {
-	border: 1px solid #79d9ce;
+
+	border: 1px solid red;
 	width: 20px;
     height: 20px;
     margin-right: 10px;
