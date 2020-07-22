@@ -1,6 +1,6 @@
 # Path Finding Algorithm Visualizer 
 
-This is a simple web-based application created by me and my team-mate Pranay Mishra while working under the Microsoft Mars Colonization Program and in process developing our own path-finding algorithm visualizer.
+This is a simple web-based application created by me and my team-mate Meghaj Singh while working under the Microsoft Mars Colonization Program and in process developing our own path-finding algorithm visualizer.
 
 <img src="images/webview.png">
 
