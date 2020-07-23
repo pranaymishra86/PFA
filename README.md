@@ -1,7 +1,7 @@
 # Path Finding Algorithm Visualizer 
 
 This is a simple web-based application created by me and my team-mate Meghaj Singh while working under the Microsoft Mars Colonization Program and in process developing our own path-finding algorithm visualizer.
-Link - https://memeghaj10.github.io/pathfindingvisualizer/
+Link - https://pranaymishra86.github.io/PFA/
 
 <img src="images/webview.png">
 
